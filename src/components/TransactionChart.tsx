@@ -1,42 +1,52 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getHistoricalTrades } from '../api';
+import styles from './TransactionChart.module.scss';
 
 const mapChartData = (items = []) => items.map(item => ({
-  name: item.time,
+  name: new Date(item.time).toLocaleTimeString(),
   amt: item.price,
-  uv: item.qty,
-  pv: item.quoteQty
+  quantity: item.qty,
+  quoteQuantity: item.quoteQty
 }))
 
 export const TransactionChart = () => {
+  const [interval, setInterval] = useState(2000);
   const { data } = useQuery({
     queryFn: getHistoricalTrades,
-    queryKey: ['trades']
+    queryKey: ['trades'],
+    refetchInterval: interval
   });
 
+  const chartData = useMemo(() => mapChartData(data), [data]);
+
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <LineChart
-        width={500}
-        height={300}
-        data={mapChartData(data)}
-        margin={{
-          top: 5,
-          right: 30,
-          left: 20,
-          bottom: 5,
-        }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="name" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="pv" stroke="#8884d8" activeDot={{ r: 8 }} />
-        <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-      </LineChart>
-    </ResponsiveContainer>
+    <>
+      {interval > 0 ? (
+        <button className={styles.button} onClick={() => setInterval(0)}>Stop data fetching</button>
+      ) : (
+        <button className={styles.button} onClick={() => setInterval(2000)}>Run data sync</button>
+      )}
+      <ResponsiveContainer className={styles.container}>
+        <LineChart
+          data={chartData}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3"/>
+          <XAxis dataKey="name"/>
+          <YAxis label="Price"/>
+          <Tooltip/>
+          <Legend/>
+          <Line type="monotone" dataKey="quoteQuantity" stroke="#8884d8" activeDot={{r: 8}}/>
+          <Line type="monotone" dataKey="quantity" stroke="#82ca9d"/>
+        </LineChart>
+      </ResponsiveContainer>
+    </>
   );
 };
