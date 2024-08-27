@@ -1,14 +1,14 @@
-import { useState } from 'react'
+import { ToastContainer } from 'react-toastify';
 import { TransactionChart } from './components/TransactionChart.tsx';
 import './App.css'
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
     <>
       <h1>Welcome to Binance App</h1>
       <TransactionChart />
+      <ToastContainer />
     </>
   )
 }

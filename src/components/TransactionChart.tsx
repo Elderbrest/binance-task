@@ -16,7 +16,7 @@ export const TransactionChart = () => {
   const { data } = useQuery({
     queryFn: getHistoricalTrades,
     queryKey: ['trades'],
-    refetchInterval: interval
+    refetchInterval: interval,
   });
 
   const chartData = useMemo(() => mapChartData(data), [data]);
